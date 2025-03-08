@@ -13,7 +13,7 @@ Web Crawler & Web Scraper
 Clone the Repository
 
 
-git clone https://github.com/yourusername/webcrawler-scraper.git
+git clone (https://github.com/JAiga1/webscraper.git)
 cd webcrawler-scraper
 Install Dependencies
 
