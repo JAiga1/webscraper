@@ -8,6 +8,10 @@ Web Crawler & Web Scraper
 ✅ Stores data in CSV format for easy analysis.
 ✅ User-agent rotation to avoid detection.
 ✅ Supports handling dynamic content (optional).
+✅ Extracts title, meta description, and meta keywords
+✅ Fetches H1 to H6 headings for keyword analysis
+✅ Collects internal and external links
+✅ Saves data in a CSV file
 
 📦 Installation
 Clone the Repository
