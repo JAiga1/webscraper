@@ -6,23 +6,23 @@ from urllib.parse import urljoin, urlparse
 def fetch_seo_data(url):
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
-        
+
         soup = BeautifulSoup(response.text, "html.parser")
 
-        title = soup.title.string if soup.title else "N/A"
+        title = soup.title.string.strip() if soup.title else "N/A"
         meta_desc = soup.find("meta", attrs={"name": "description"})
-        meta_desc = meta_desc["content"] if meta_desc else "N/A"
+        meta_desc = meta_desc["content"].strip() if meta_desc else "N/A"
 
         meta_keywords = soup.find("meta", attrs={"name": "keywords"})
-        meta_keywords = meta_keywords["content"] if meta_keywords else "N/A"
+        meta_keywords = meta_keywords["content"].strip() if meta_keywords else "N/A"
 
-        headings = {f"H{i}": [h.text.strip() for h in soup.find_all(f"h{i}")] for i in range(1, 7)}
+        headings = {f"H{i}": [h.get_text(strip=True) for h in soup.find_all(f"h{i}")] for i in range(1, 7)}
 
         internal_links, external_links = set(), set()
         for link in soup.find_all("a", href=True):
-            href = link["href"]
+            href = link["href"].strip()
             full_url = urljoin(url, href)
             if urlparse(full_url).netloc == urlparse(url).netloc:
                 internal_links.add(full_url)
@@ -44,11 +44,15 @@ def fetch_seo_data(url):
         return None
 
 def save_to_csv(data, filename="seo_data.csv"):
+    if not data:
+        print("No data to save.")
+        return
+    
     df = pd.DataFrame(data)
     df.to_csv(filename, index=False, encoding="utf-8")
     print(f"Data saved to {filename}")
 
 if __name__ == "__main__":
     urls = ["https://example.com", "https://anotherwebsite.com"]  # Add URLs here
-    seo_results = [fetch_seo_data(url) for url in urls if fetch_seo_data(url)]
+    seo_results = [result for url in urls if (result := fetch_seo_data(url))]
     save_to_csv(seo_results)
