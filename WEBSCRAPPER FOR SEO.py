@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from urllib.parse import urljoin, urlparse
-
+#
 def fetch_seo_data(url):
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
