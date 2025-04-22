@@ -1,27 +1,26 @@
+from flask import Flask, request, jsonify
 import cv2
 import pytesseract
 import numpy as np
 
-image_path = "sample_image.png"
-image = cv2.imread(image_path)
+app = Flask(__name__)
 
-# Check if image loaded
-if image is None:
-    print("Error: Could not load image.")
-    exit()
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({"error": "No image provided"}), 400
+    
+    file = request.files['image']
+    image = cv2.imdecode(np.frombuffer(file.read(), np.uint8), cv2.IMREAD_COLOR)
+    
+    # Your existing preprocessing and OCR code
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                 cv2.THRESH_BINARY, 11, 2)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+    text = pytesseract.image_to_string(gray, config='--oem 3 --psm 6')
+    
+    return jsonify({"extracted_text": text})
 
-# Convert to grayscale
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-# Apply adaptive thresholding to handle varying lighting
-gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-                            cv2.THRESH_BINARY, 11, 2)
-
-# Optional: Remove noise with a blur
-gray = cv2.GaussianBlur(gray, (5, 5), 0)
-
-# OCR with some config tweaks
-custom_config = r'--oem 3 --psm 6'  # OEM 3 = default, PSM 6 = assume a single uniform block of text
-text = pytesseract.image_to_string(gray, config=custom_config)
-
-print("Extracted Text:\n", text)
+if __name__ == '__main__':
+    app.run(debug=True)
